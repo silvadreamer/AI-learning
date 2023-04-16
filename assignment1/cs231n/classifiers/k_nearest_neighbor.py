@@ -1,5 +1,6 @@
 from builtins import range
 from builtins import object
+from collections import Counter
 import numpy as np
 from past.builtins import xrange
 
@@ -64,8 +65,11 @@ class KNearestNeighbor(object):
           is the Euclidean distance between the ith test point and the jth training
           point.
         """
+        # 测试集的数量（行数）
         num_test = X.shape[0]
+        # 训练集的数量（行数）
         num_train = self.X_train.shape[0]
+        # 初始化获得一个测试集行数，训练集列数的矩阵
         dists = np.zeros((num_test, num_train))
         for i in range(num_test):
             for j in range(num_train):
@@ -76,6 +80,9 @@ class KNearestNeighbor(object):
                 # not use a loop over dimension, nor use np.linalg.norm().          #
                 #####################################################################
                 # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+                
+                dists[i, j] = np.sum((X[i] - self.X_train[j]) ** 2) ** 0.5
+                #取出当前行的图片，计算与第j张图片的距离
 
                 pass
 
@@ -89,9 +96,9 @@ class KNearestNeighbor(object):
 
         Input / Output: Same as compute_distances_two_loops
         """
-        num_test = X.shape[0]
-        num_train = self.X_train.shape[0]
-        dists = np.zeros((num_test, num_train))
+        num_test = X.shape[0] #获得测试集数量
+        num_train = self.X_train.shape[0] #获得训练集数量
+        dists = np.zeros((num_test, num_train)) #初始化
         for i in range(num_test):
             #######################################################################
             # TODO:                                                               #
@@ -100,6 +107,9 @@ class KNearestNeighbor(object):
             # Do not use np.linalg.norm().                                        #
             #######################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+            
+            # 广播机制
+            dists[i] = np.sum((X[i] - self.X_train) ** 2, axis = 1) ** 0.5
 
             pass
 
@@ -116,6 +126,11 @@ class KNearestNeighbor(object):
         num_test = X.shape[0]
         num_train = self.X_train.shape[0]
         dists = np.zeros((num_test, num_train))
+        
+        xx = np.sum(X**2, axis=1, keepdims=True)
+        yy = np.sum(self.X_train**2, axis=1)
+        _2xy = -2 * X.dot(self.X_train.T)
+        dists = (xx + yy + _2xy) ** 0.5
         #########################################################################
         # TODO:                                                                 #
         # Compute the l2 distance between all test points and all training      #
@@ -149,8 +164,8 @@ class KNearestNeighbor(object):
         - y: A numpy array of shape (num_test,) containing predicted labels for the
           test data, where y[i] is the predicted label for the test point X[i].
         """
-        num_test = dists.shape[0]
-        y_pred = np.zeros(num_test)
+        num_test = dists.shape[0] #获得测试集数量
+        y_pred = np.zeros(num_test) #初始化
         for i in range(num_test):
             # A list of length k storing the labels of the k nearest neighbors to
             # the ith test point.
@@ -163,6 +178,10 @@ class KNearestNeighbor(object):
             # Hint: Look up the function numpy.argsort.                             #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+            
+            idx = np.argsort(dists[i]) #对第i张图片所有的测试集的距离进行排序，获得idx索引（矩阵）
+            closet_y = [self.y_train[x] for x in idx][:k] #按照索引排序,区前k张
+            
 
             pass
 
@@ -175,6 +194,10 @@ class KNearestNeighbor(object):
             # label.                                                                #
             #########################################################################
             # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+            
+            counter = Counter(closet_y) #Counter对次数投票
+            _y_pred = counter.most_common(1) #common范围前i个最大的元组
+            y_pred[i] = _y_pred[0][0] #获得第一大的标签
 
             pass
 
