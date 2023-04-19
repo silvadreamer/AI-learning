@@ -24,25 +24,34 @@ def svm_loss_naive(W, X, y, reg):
     dW = np.zeros(W.shape) # initialize the gradient as zero
 
     # compute the loss and the gradient
-    num_classes = W.shape[1]
-    num_train = X.shape[0]
-    loss = 0.0
-    for i in range(num_train):
-        scores = X[i].dot(W)
-        correct_class_score = scores[y[i]]
-        for j in range(num_classes):
+    num_classes = W.shape[1] # 获得所有的种类数量
+    num_train = X.shape[0] # 获得测试集的数量
+    loss = 0.0 # 损失
+    for i in range(num_train): # 遍历测试集
+        scores = X[i].dot(W) # 获得当前对所有种类的权重和
+        correct_class_score = scores[y[i]] # 获得正确的得分
+        for j in range(num_classes): # 计算不正确的差值
             if j == y[i]:
                 continue
             margin = scores[j] - correct_class_score + 1 # note delta = 1
             if margin > 0:
+                # 求梯度
+                # dL/dW = dL/dS * dS/dW
+#                 ds = 1/num_train
+#                 dys = -1/num_train
+                # ds_dw = X[i] #ds/dw
+                dW[:,j] += X[i]
+                if y[i] > 0:
+                    dW[:y[i]] -= X[i]
                 loss += margin
 
     # Right now the loss is a sum over all training examples, but we want it
     # to be an average instead so we divide by num_train.
-    loss /= num_train
+    
+    loss /= num_train # 求平均
 
     # Add regularization to the loss.
-    loss += reg * np.sum(W * W)
+    loss += reg * np.sum(W * W) # W*W是每个位置上平方，乘上正则化系数
 
     #############################################################################
     # TODO:                                                                     #
@@ -53,7 +62,8 @@ def svm_loss_naive(W, X, y, reg):
     # code above to compute the gradient.                                       #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+    dW /= num_train
+    dW += 2 * reg * W
     pass
 
     # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****

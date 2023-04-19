@@ -18,3 +18,7 @@ test = np.zeros((1, 20))
 for i in range(20):
     test[0, i] = int(1)
     print(test)
+
+
+mat = np.array([[1, 2], [2, 3]])
+print(mat * mat)
