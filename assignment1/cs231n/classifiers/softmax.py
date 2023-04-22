@@ -57,6 +57,13 @@ def softmax_loss_vectorized(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    N = X.shape[0]
+    score = X.dot(W)
+    #防止指数爆炸
+    score -= np.max(score, axis = 1, keepdims=True)
+    loss1 = -score(range(N), y) + np.log(np.sum(np.exp(score), axis=1))
+    loss = np.sum(loss1)/N + res * np.sum(W ** 2)
+    
 
     pass
 

@@ -79,6 +79,9 @@ class TwoLayerNet(object):
         # shape (N, C).                                                             #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+        
+        f1 = np.maximum(X.dot(W1) + b1, 0)
+        scores = f1.dot(W2) + b2
 
         pass
 
@@ -97,7 +100,11 @@ class TwoLayerNet(object):
         # classifier loss.                                                          #
         #############################################################################
         # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
-
+        shift_scores = scores - np.max(scores, axis=1)
+        # softmax
+        softmax_scores = np.exp(shift_scores)/np.sum(np.exp(shift_scores), axis = 1)[...,None]
+        # 交叉熵损失函数
+        
         pass
 
         # *****END OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
