@@ -32,6 +32,24 @@ def softmax_loss_naive(W, X, y, reg):
     # regularization!                                                           #
     #############################################################################
     # *****START OF YOUR CODE (DO NOT DELETE/MODIFY THIS LINE)*****
+    num_classes = W.shape[1]
+    num_train = X.shape[0]
+
+    for i in xrange(num_train):
+      scores = X[i].dot(W)
+      shift_scores = scores - max(scores)
+      loss_i = - shift_scores[y[i]] + np.log(sum(np.exp(shift_scores)))
+      loss += loss_i
+      for j in xrange(num_classes):
+         softmax_output = np.exp(shift_scores[j])/sum(np.exp(shift_scores))
+         if j == y[i]:
+             dW[:,j] += (-1 + softmax_output) *X[i] 
+         else: 
+             dW[:,j] += softmax_output *X[i] 
+
+    loss /= num_train 
+    loss +=  0.5* reg * np.sum(W * W)
+    dW = dW/num_train + reg* W 
 
     pass
 
@@ -61,9 +79,18 @@ def softmax_loss_vectorized(W, X, y, reg):
     score = X.dot(W)
     #防止指数爆炸
     score -= np.max(score, axis = 1, keepdims=True)
-    loss1 = -score(range(N), y) + np.log(np.sum(np.exp(score), axis=1))
-    loss = np.sum(loss1)/N + res * np.sum(W ** 2)
+    loss1 = -score[range(N), y] + np.log(np.sum(np.exp(score), axis=1))
+    loss = np.sum(loss1)/N + reg * np.sum(W ** 2)
     
+    dloss1 = np.ones_like(loss1)/N # (N,)
+    # 先求后半部分的偏导
+    dscores_local = np.exp(score)/np.sum(np.exp(score), axis = 1, keepdims = True)
+    # 再求第一部分的偏导
+    dscores_local[[range(N)], y] -= 1
+    
+    #链式法则
+    dscores = dloss1.reshape(N, 1) * dscores_local
+    dW = X.T.dot(dscores) + 2 * reg * W
 
     pass
 
